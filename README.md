@@ -20,6 +20,7 @@ PIN 14: TX
 PIN GROUND: GROUND
 ```
 ### SIM808
+sim808 evb-v3.2
 ```
 RPI TX to RXD
 RPI RX to TXD
