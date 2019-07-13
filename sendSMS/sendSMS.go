@@ -3,11 +3,16 @@ package main
 import (
 	"bytes"
 	"log"
+	"log/syslog"
 	"os"
 	"strings"
 
-	"github.com/tarm/serial"
+	"../config"
+	"../serialwrapper"
 )
+
+// global syslog writer
+var syslogWriter, _ = syslog.New(syslog.LOG_USER, config.SysLogTagEmitter)
 
 func main() {
 	args := os.Args
@@ -20,39 +25,29 @@ func main() {
 
 	number := args[1]
 
-	c := &serial.Config{Name: "/dev/ttyAMA0", Baud: 9600}
-	s, err := serial.OpenPort(c)
-	if err != nil {
-		log.Fatal(err)
-	}
+	// init serial port
+	s := serialwrapper.Init()
+	_ = syslogWriter.Info("serial port initialized")
 
-	send(s, "AT+CMGF=1")
+	// set SMS message format to text (1) mode
+	serialwrapper.Send(s, "AT+CMGF=1")
 
-	var numberBuffer bytes.Buffer
-	numberBuffer.WriteString("AT+CMGS=\"")
-	numberBuffer.WriteString(number)
-	numberBuffer.WriteString("\"")
-	send(s, numberBuffer.String())
-	send(s, strings.Join(args[2:], " "))
-	send(s, "\u001A")
+	message := strings.Join(args[2:], " ")
 
-	buf := make([]byte, 128)
-	n, err := s.Read(buf)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%q", buf[:n])
-
-}
-
-func send(s *serial.Port, command string) {
+	// send SMS message
 	var buffer bytes.Buffer
-	buffer.WriteString(command)
-	buffer.WriteString("\n")
-	b := []byte(buffer.String())
-	_, err := s.Write(b)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("%q", b)
+	buffer.WriteString("AT+CMGS=\"")
+	buffer.WriteString(number)
+	buffer.WriteString("\"")
+	serialwrapper.Send(s, buffer.String())
+	serialwrapper.Send(s, message)
+	serialwrapper.Send(s, "\u001A")
+
+	// syslog writer
+	buffer.Reset()
+	buffer.WriteString("sms sent to ")
+	buffer.WriteString(number)
+	buffer.WriteString(" ")
+	buffer.WriteString(message)
+	_ = syslogWriter.Info(buffer.String())
 }
