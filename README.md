@@ -28,9 +28,6 @@ RPI GROUND to GROUND
 ```
 
 ## tests
-https://www.elecrow.com/download/SIM800%20Series_AT%20Command%20Manual_V1.09.pdf
-http://acoptex.com/project/264/basics-project-053d-sim808-gsm-gprs-gps-bluetooth-evolution-board-evb-v32-at-acoptexcom/
-https://wiki.dfrobot.com/SIM808_GPS_GPRS_GSM_Shield_SKU__TEL0097
 ```
 > minicom
 
@@ -45,3 +42,9 @@ Press CTRL-A Z for help on special keys
 AT
 OK
 ```
+### sources
+[SIM800_Series_AT_Command_Manual_V1.09.pdf](./SIM800_Series_AT_Command_Manual_V1.09.pdf)
+
+http://acoptex.com/project/264/basics-project-053d-sim808-gsm-gprs-gps-bluetooth-evolution-board-evb-v32-at-acoptexcom/
+
+https://wiki.dfrobot.com/SIM808_GPS_GPRS_GSM_Shield_SKU__TEL0097
