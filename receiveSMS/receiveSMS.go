@@ -5,9 +5,12 @@ import (
 	"encoding/hex"
 	"log"
 	"log/syslog"
+	"os"
+	"os/signal"
 	"regexp"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"../config"
@@ -29,12 +32,34 @@ var syslogWriter, _ = syslog.New(syslog.LOG_USER, config.SysLogTagReceiver)
 
 func main() {
 	// init the serial port
-	var s = serialwrapper.Init()
+	s := serialwrapper.Init()
+	defer s.Close()
 	_ = syslogWriter.Info("serial port initialized")
+
+	serialwrapper.Send(s, "AT+CMGF=0")
 
 	// start to continually read the serial output and fill the buffer with it
 	go read(s)
 
+	go handleMessages(s)
+
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
+	signal := <-c
+	log.Println(signal)
+	os.Remove(serialwrapper.Lockfile)
+	syscall.Exit(0)
+}
+
+// read the serial output and put it to the global buffer
+func read(s *serial.Port) {
+	for {
+		output := serialwrapper.Read(s)
+		bufferStr.WriteString(output)
+	}
+}
+
+func handleMessages(s *serial.Port) {
 	// indefinitely
 	for {
 		// tell to the chip that we want all messages with the CMGL command
@@ -74,18 +99,6 @@ func main() {
 
 		// clear the buffer
 		bufferStr.Reset()
-	}
-}
-
-// read the serial output and put it to the global buffer
-func read(s *serial.Port) {
-	for {
-		buf := make([]byte, 128)
-		n, err := s.Read(buf)
-		if err != nil {
-			log.Fatal(err)
-		}
-		bufferStr.WriteString(string(buf[:n]))
 	}
 }
 

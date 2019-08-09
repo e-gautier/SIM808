@@ -2,10 +2,14 @@ package main
 
 import (
 	"bytes"
+	"encoding/hex"
 	"log"
 	"log/syslog"
 	"os"
+	"strconv"
 	"strings"
+
+	"github.com/xlab/at/sms"
 
 	"../config"
 	"../serialwrapper"
@@ -29,18 +33,27 @@ func main() {
 	s := serialwrapper.Init()
 	_ = syslogWriter.Info("serial port initialized")
 
-	// set SMS message format to text (1) mode
-	serialwrapper.Send(s, "AT+CMGF=1")
-
 	message := strings.Join(args[2:], " ")
 
-	// send SMS message
+	// set SMS message format to PDU (0) mode
+	serialwrapper.Send(s, "AT+CMGF=0")
+
+	smsPDU := new(sms.Message)
+	smsPDU.Text = message
+	smsPDU.Address = sms.PhoneNumber(number)
+	smsPDU.Type = sms.MessageTypes.Submit
+	length, data, err := smsPDU.PDU()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	hexaPDU := hex.EncodeToString(data)
 	var buffer bytes.Buffer
-	buffer.WriteString("AT+CMGS=\"")
-	buffer.WriteString(number)
-	buffer.WriteString("\"")
+	buffer.WriteString("AT+CMGS=")
+	buffer.WriteString(strconv.Itoa(length))
+
 	serialwrapper.Send(s, buffer.String())
-	serialwrapper.Send(s, message)
+	serialwrapper.Send(s, hexaPDU)
 	serialwrapper.Send(s, "\u001A")
 
 	// syslog writer
