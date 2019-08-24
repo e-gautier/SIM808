@@ -9,6 +9,8 @@ help: ## help
 build: ## build main
 	env GOOS=linux GOARCH=arm CC=${CC} CC_FOR_TARGET=${CC} CGO_ENABLED=1 go build -i -v -o build/sendSMS sendSMS/sendSMS.go
 	env GOOS=linux GOARCH=arm CC=${CC} CC_FOR_TARGET=${CC} CGO_ENABLED=1 go build -i -v -o build/receiveSMS receiveSMS/receiveSMS.go
+	env GOOS=linux GOARCH=arm CC=${CC} CC_FOR_TARGET=${CC} CGO_ENABLED=1 go build -i -v -o build/sim808boot boot/boot.go
+	env GOOS=linux GOARCH=arm CC=${CC} CC_FOR_TARGET=${CC} CGO_ENABLED=1 go build -i -v -o build/sim808halt halt/halt.go
 
 clean: ## clean build
 	rm -f build/*

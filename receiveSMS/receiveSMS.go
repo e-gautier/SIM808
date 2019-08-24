@@ -47,7 +47,6 @@ func main() {
 	signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
 	signal := <-c
 	log.Println(signal)
-	os.Remove(serialwrapper.Lockfile)
 	syscall.Exit(0)
 }
 

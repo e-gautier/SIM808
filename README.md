@@ -26,7 +26,17 @@ RPI TX to RXD
 RPI RX to TXD
 RPI GROUND to GROUND
 ```
+Notice: TX and RX ports are crossed.
+## Software config
+```
+raspi-config
 
+- enable serial interface
+- disable serial login shell
+```
+Reboot
+
+In case of issues have a look to [this SO post](https://raspberrypi.stackexchange.com/a/47851/71747)
 ## tests
 ```
 > minicom

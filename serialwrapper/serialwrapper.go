@@ -9,7 +9,8 @@ import (
 )
 
 const (
-	serialDeviceFile = "/dev/ttyAMA0"
+	// "/dev/ttyAMA0" can be the serial port on several rpi models
+	serialDeviceFile = "/dev/ttyS0"
 )
 
 // Send comand through serial port
